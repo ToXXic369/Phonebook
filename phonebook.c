@@ -14,10 +14,11 @@ void add_contact(node **head);
 void free_all(node **head);
 void remove_contact(node **head);
 void display_all(node *head);
-void search_contact(node *head);
+node* search_contact(node *head,char choice[]);
 
 int main(void) {
   node *head = NULL;
+  char choice[MAX];
 
   printf("1.To add a contact.\n");
   printf("2.To remove a contact.\n");
@@ -43,7 +44,18 @@ int main(void) {
         display_all(head);
         break;
       case 4:
-        search_contact(head);
+        printf("enter name, ");
+        fgets(choice,MAX,stdin);
+        choice[strcspn(choice,"\n")] = '\0';
+
+        node *result;
+        result=search_contact(head,choice);
+        if(result != NULL) {
+          printf("Number: %s\n",result->number);
+        } else {
+          printf("contact not found.\n");
+        }
+        
         break;
       case 5:
         free_all(&head);
@@ -95,35 +107,36 @@ void remove_contact(node **head) {
     printf("nothing to delete.\n");
     return;
   }
-
-  node *next = *head;
-  node *prev = NULL;
-
+  
   char choice[MAX];
   printf("enter name, ");
   fgets(choice,MAX,stdin);
   choice[strcspn(choice,"\n")] = '\0';
 
-
-  if (strcasecmp(choice,next->name) == 0) {
-    *head = (*head)->next;
-    free(next);
+  node *result=search_contact(*head,choice);
+  if(result != NULL) {
+    node *next = *head;
+    node *prev = NULL;
+    if (strcasecmp(choice,next->name) == 0) {
+      *head = (*head)->next;
+      free(next);
+      printf("deleted succesfully.\n");
+      return;
+    } else {
+      while (strcasecmp(choice,next->name) != 0) {
+        prev = next;
+        next = next->next;
+      }
+      prev->next = next->next;
+      free(next);    prev = next;
+      next = next->next;
+    }
     printf("deleted succesfully.\n");
     return;
   } else {
-
-    while (strcasecmp(choice,next->name) != 0) {
-      prev = next;
-      next = next->next;
-    }
-
-    prev->next = next->next;
-    free(next);    prev = next;
-    next = next->next;
-
-    printf("deleted succesfully.\n");
+    printf("contact not found.\n");
     return;
-  }
+  }  
 }
 
 void display_all(node *head) {
@@ -133,39 +146,28 @@ void display_all(node *head) {
   }
 
   node *chad = head;
-
   while (chad != NULL) {
-    printf("Name: %s\nNumber: %s\n\n",chad->name,chad->number);
+    printf("Name: %s\tNumber: %s\n\n",chad->name,chad->number);
     chad=chad->next;
   }
 
 }
-void search_contact(node *head) {
+node* search_contact(node *head,char choice[]) {
   if (head == NULL) {
     printf("nothing to search.\n");
-    return;
+    return NULL;
   }
 
-  char choice[MAX];
-  printf("enter name, ");
-  fgets(choice,MAX,stdin);
-  choice[strcspn(choice,"\n")] = '\0';
-  
   node *chad = head;
 
-  while (1) {
-    if (strcasecmp(choice,chad->name) == 0 || chad->next == NULL) {
+  while (chad != NULL) {
+    if (strcasecmp(choice,chad->name) == 0 ) {
+      return chad;
       break;
     }
     chad = chad->next;
   }
 
-  if(strcasecmp(choice,chad->name) == 0) {
-    printf("Number: %s\n",chad->number);
-    return;
-  } else {
-    printf("not found.\n");
-    return;
-  }
+  return NULL;
 }
 
